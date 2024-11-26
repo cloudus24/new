@@ -21,7 +21,7 @@ app.use("/", Route);
 
 mongoose.set("strictQuery", true);
 mongoose
-  .connect(process.env.MONGO_URL, {})
+  .connect(`mongodb+srv://het:het@cluster0.gazxhf7.mongodb.net/liveTest?retryWrites=true&w=majority&appName=Cluster0`, {})
   .then(() => {
     console.log("[INFO] Connected to MongoDB");
   })
