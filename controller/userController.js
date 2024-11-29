@@ -34,21 +34,22 @@ exports.login = async (req, res) => {
       });
     }
 
-    const payload = {
+    const data = {
       id: user._id,
       name: user.userName,
       email: user.email,
       address: user.address,
     };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+    const token = jwt.sign(data, process.env.JWT_SECRET, {
       expiresIn: `1h`,
     });
 
     return res.status(200).json({
       status: true,
       message: `User logged in successfully`,
-      token,
+      auth_token :token,
+      data
     });
   } catch (error) {
     console.error();
