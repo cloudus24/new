@@ -8,8 +8,8 @@ const { authenticateToken } = require("../middlewere/adminAuth")
 
 route.get("/show" ,checkAccess, userController.userGet)
 
-route.post("/create", checkAccess,userController.register)
-route.post("/registerInWeb",checkAccess, userController.registerInWeb)
+// route.post("/create", checkAccess,userController.register)
+route.post("/create",checkAccess, userController.registerInWeb)
 route.delete("/delete", checkAccess,userController.userDelete)
 route.patch("/update", checkAccess,userController.userUpdate)
 route.post("/login",checkAccess, userController.login)
