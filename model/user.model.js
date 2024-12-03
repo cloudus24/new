@@ -20,7 +20,7 @@ const userSchema = new mongoose.Schema(
     password: String,
     address: [addressSchema],
     otp: {
-      type: Number,
+      type: String,
       default: null
     },
     isEmailVerified: {

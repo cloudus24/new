@@ -8,7 +8,7 @@ const nodemailer = require("nodemailer");
  * @param {string} htmlContent - The HTML content of the email.
  * @returns {Promise<void>}
  */
-const sendOtpInEmail = async (email, subject, htmlContent) => {
+exports.sendOtpInEmail = async (email, subject, htmlContent) => {
   try {
     // Configure the transporter
     const transporter = nodemailer.createTransport({
@@ -36,4 +36,4 @@ const sendOtpInEmail = async (email, subject, htmlContent) => {
   }
 };
 
-module.exports = sendOtpInEmail;
+
