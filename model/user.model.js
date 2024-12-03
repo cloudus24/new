@@ -19,7 +19,10 @@ const userSchema = new mongoose.Schema(
     email: String,
     password: String,
     address: [addressSchema],
-    otpToken: String,
+    otp: {
+      type: Number,
+      default: null
+    },
     isEmailVerified: {
       type: Boolean,
       default: false,

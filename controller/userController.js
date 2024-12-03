@@ -247,48 +247,63 @@ exports.registerInWeb = async (req, res) => {
     if (!userName || !email || !password) {
       return res.status(401).json({
         status: false,
-        message: `invalid fields`,
+        message: "Invalid fields",
       });
     }
 
-    const usera = await User.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
-    if (usera) {
+    if (existingUser) {
       return res.status(400).json({
         status: false,
-        message: `User already exists`,
+        message: "User already exists",
       });
     }
-
-    console.log(`req.body`, req.body);
 
     const hash = await bcrypt.hash(password, 10);
 
-    const user = new User();
-
-    user.userName = userName;
-    user.email = email;
-    user.password = hash;
+    const user = new User({
+      userName,
+      email,
+      password: hash,
+    });
 
     await user.save();
 
-    const payload = {
-      id: user._id,
-      name: user.userName,
-      email: user.email,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: `1d`,
-    });
+    // Generate a verification token
+    const verificationToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" } // Token expires in 1 hour
+    );
+
+    // Email content
+    const emailSubject = "Verify Your Email";
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
+        <h2>Verify Your Email</h2>
+        <p>Click the link below to verify your email address:</p>
+        <a href="${process.env.FRONTEND_BASE_URL}/verify-email?token=${verificationToken}" style="color: #4CAF50;">Verify Email</a>
+        <p>This link will expire in 1 hour.</p>
+        <br>
+        <p>Best regards,</p>
+        <p>Your App Name Team</p>
+      </div>
+    `;
+
+    // Send verification email
+    await sendOtpInEmail(email, emailSubject, emailHtml);
 
     return res.status(200).json({
       status: true,
-      message: `User logged in successfully`,
-      token,
+      message: "User registered successfully. Verification email sent.",
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ msg: error.message });
+    console.error("Error during registration: ", error);
+    return res.status(500).json({
+      status: false,
+      message: error.message,
+    });
   }
 };
 
