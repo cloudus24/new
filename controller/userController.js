@@ -1,6 +1,52 @@
 const { User } = require(`../model/index.model`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
+const { sendOtpInEmail } = require("../utils/nodeMailer");
+
+
+
+exports.emailVerification =  async(req,res)=>{
+  try {
+    const {email}=req.body
+
+    if (!email) {
+      return res.status(400).json({
+        status: false,
+        message: "Please provide both email and password to login",
+      });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({
+        status: false,
+        message: "Invalid credentials",
+        user,
+      });
+    }
+    const data = {
+      id: user._id,
+      email: user.email,
+    };
+
+    const token = jwt.sign(data, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    return res.status(200).json({
+      status: true,
+      message: "Email sent successfully",
+      token,
+    });
+    
+  } catch (error) {
+    console.error("error:",error);
+    return res.status(500).json({
+      status: false,
+      message: `Internal Server Error ${error.message}`,
+    });
+  }
+}
 
 exports.login = async (req, res) => {
   try { 
@@ -27,7 +73,9 @@ exports.login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
+    if (isMatch) {
+      sendOtpInEmail(user.email,user.otp)
+    } else {
       return res.status(400).json({
         status: false,
         message: "Invalid credentials",
@@ -52,7 +100,7 @@ exports.login = async (req, res) => {
       data
     });
   } catch (error) {
-    console.error();
+    console.error("error:",error);
     return res.status(500).json({
       status: false,
       message: `Internal Server Error ${error.message}`,

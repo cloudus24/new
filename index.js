@@ -31,7 +31,7 @@ mongoose
 
 app.listen(PORT, () => {
   pingTimeout = setTimeout(() => {}, 30000);
-  console.log(`[INFO] Server started on port ${PORT}`);
+  console.log(`[INFO] Server started on port : ${PORT}`);
 });
 
 
