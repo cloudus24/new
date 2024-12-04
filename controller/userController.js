@@ -60,6 +60,7 @@ exports.login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
+    console.log('user', user)
 
     if (!user) {
       return res.status(400).json({
@@ -71,15 +72,13 @@ exports.login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    if (isMatch) {
-      sendOtpInEmail(user.email,user.otp)
-    } else {
+    if (!isMatch) {
       return res.status(400).json({
         status: false,
         message: "Invalid credentials",
+        user,
       });
     }
-
     const data = {
       id: user._id,
       name: user.userName,
@@ -244,6 +243,8 @@ exports.registerInWeb = async (req, res) => {
   try {
     const { userName, email, password } = req.body;
 
+    console.log('req.body', req.body)
+
     if (!userName || !email || !password) {
       return res.status(401).json({
         status: false,
@@ -253,25 +254,18 @@ exports.registerInWeb = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
 
-    // if (existingUser) {
-    //   return res.status(400).json({
-    //     status: false,
-    //     message: "User already exists",
-    //   });
-    // }
+    if (existingUser) {
+      return res.status(400).json({
+        status: false,
+        message: "User already exists",
+      });
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
     const hash = await bcrypt.hash(password, 10);
     const otpHash = await bcrypt.hash(otp.toString(), 10);
 
 
-    // Generate a random OTP (6 digits)
-
-
-    // Save the OTP in the user's document or in a separate OTP collection (optional)
-    // For simplicity, we're just sending it via email here.
-
-    // Email content with OTP
     const emailSubject = "Your OTP for Registration";
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
@@ -293,12 +287,17 @@ exports.registerInWeb = async (req, res) => {
       otp:otpHash,
     });
 
-    
+    const data = {
+      id: user._id,
+      email: user.email,
+    };
+
     await user.save();
 
     return res.status(200).json({
       status: true,
-      message:` User registered successfully. OTP sent to email.${otp}`,
+      message:` User registered successfully. OTP sent to email`,
+      data:data.email
     });
   } catch (error) {
     console.error("Error during registration: ", error);
