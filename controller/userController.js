@@ -319,7 +319,6 @@ exports.verifyOtp = async (req, res) => {
       return res.status(400).json({ status: false, message: 'Email and OTP are required' });
     }
 
-    // Find user by email
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -341,6 +340,7 @@ exports.verifyOtp = async (req, res) => {
     }
 
     user.otp = undefined;  
+    user.isVerified = true;
     await user.save();
 
     const data = {
@@ -350,10 +350,8 @@ exports.verifyOtp = async (req, res) => {
       address: user.address,
     };
 
-    // Create JWT token for the user
-    const token = jwt.sign(data, process.env.JWT_SECRET, {
-      expiresIn: '1h', // Token expires in 1 hour
-    });
+
+    const token = jwt.sign(data, process.env.JWT_SECRET);
 
     return res.status(200).json({
       status: true,
