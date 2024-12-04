@@ -212,6 +212,8 @@ exports.userDelete = async (req, res) => {
   }
 };
 
+
+
 exports.userUpdate = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -260,12 +262,12 @@ exports.registerInWeb = async (req, res) => {
         message: "User already exists",
       });
     }
-
-    const otp = Math.floor(100000 + Math.random() * 900000);
+    const otp = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit OTP
     const hash = await bcrypt.hash(password, 10);
     const otpHash = await bcrypt.hash(otp.toString(), 10);
+    
 
-
+   console.log('otp :>> ', otp);
     const emailSubject = "Your OTP for Registration";
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; line-height: 1.5;">
@@ -327,12 +329,10 @@ exports.verifyOtp = async (req, res) => {
 
     console.log('user.otp', user.otp)
 
-    // Check if OTP exists and is not null
     if (!user.otp) {
       return res.status(400).json({ status: false, message: 'OTP not generated or expired' });
     }
 
-    // Compare the OTP entered with the hashed OTP in the database
     const isOtpValid = await bcrypt.compare(otp, user.otp);
 
     if (!isOtpValid) {
