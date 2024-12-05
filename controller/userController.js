@@ -1,11 +1,11 @@
 const { User } = require(`../model/index.model`);
 const bcrypt = require(`bcrypt`);
 const jwt = require(`jsonwebtoken`);
-const {sendOtpInEmail} = require("../utils/nodeMailer");
+const { sendOtpInEmail } = require("../utils/nodeMailer");
 
-exports.emailVerification =  async(req,res)=>{
+exports.emailVerification = async (req, res) => {
   try {
-    const {email}=req.body
+    const { email } = req.body;
 
     if (!email) {
       return res.status(400).json({
@@ -36,21 +36,20 @@ exports.emailVerification =  async(req,res)=>{
       message: "Email sent successfully",
       token,
     });
-    
   } catch (error) {
-    console.error("error:",error);
+    console.error("error:", error);
     return res.status(500).json({
       status: false,
       message: `Internal Server Error ${error.message}`,
     });
   }
-}
+};
 
 exports.login = async (req, res) => {
-  try { 
-    const { email, password } = req.body; 
+  try {
+    const { email, password } = req.body;
 
-    console.log('req.body :>> ', req.body);
+    console.log("req.body :>> ", req.body);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -60,7 +59,7 @@ exports.login = async (req, res) => {
     }
 
     const user = await User.findOne({ email });
-    console.log('user', user)
+    console.log("user", user);
 
     if (!user) {
       return res.status(400).json({
@@ -93,11 +92,11 @@ exports.login = async (req, res) => {
     return res.status(200).json({
       status: true,
       message: `User logged in successfully`,
-      auth_token :token,
-      data
+      auth_token: token,
+      data,
     });
   } catch (error) {
-    console.error("error:",error);
+    console.error("error:", error);
     return res.status(500).json({
       status: false,
       message: `Internal Server Error ${error.message}`,
@@ -135,7 +134,7 @@ exports.register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    console.log('error :>> ', error);
+    console.log("error :>> ", error);
     return res.status(500).json({ msg: error.message });
   }
 };
@@ -212,8 +211,6 @@ exports.userDelete = async (req, res) => {
   }
 };
 
-
-
 exports.userUpdate = async (req, res) => {
   try {
     const { userId } = req.query;
@@ -240,53 +237,82 @@ exports.userUpdate = async (req, res) => {
   }
 };
 
-
 exports.registerInWeb = async (req, res) => {
   try {
     const { userName, email, password } = req.body;
-
-    console.log('req.body', req.body)
-
+    console.log("req.body", req.body);
     if (!userName || !email || !password) {
       return res.status(401).json({
         status: false,
         message: "Invalid fields",
       });
     }
-
     const existingUser = await User.findOne({ email });
-
     if (existingUser) {
       return res.status(400).json({
         status: false,
         message: "User already exists",
       });
     }
-    const otp = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit OTP
+    const otp = Math.floor(1000 + Math.random() * 9000);
     const hash = await bcrypt.hash(password, 10);
     const otpHash = await bcrypt.hash(otp.toString(), 10);
-    
-
-   console.log('otp :>> ', otp);
+    console.log("otp :>> ", otp);
     const emailSubject = "Your OTP for Registration";
     const emailHtml = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.5;">
-        <h2>Your OTP Code</h2>
-        <p>Your OTP code is: <strong>${otp}</strong></p>
-        <p>This code will expire in 5 minutes.</p>
-        <br>
-        <p>Best regards,</p>
-        <p>Your App Name Team</p>
-      </div>
+       <div style="font-family: 'Arial', sans-serif; background-color: #f3f4f7; padding: 40px 0; margin: 0; box-sizing: border-box;">
+         <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
+           <!-- Header Section -->
+           <div style="text-align: center; margin-bottom: 30px;">
+             <img src="https://via.placeholder.com/150" alt="Logo" style="max-width: 150px; margin-bottom: 20px;" />
+             <h2 style="font-size: 28px; color: #2c3e50; margin: 0; font-weight: 700; letter-spacing: -0.5px;">
+               Welcome to Your App Name!
+             </h2>
+             <p style="font-size: 16px; color: #7f8c8d; margin-top: 5px;">Please verify your account by entering the OTP code below.</p>
+           </div>
+       
+           <!-- OTP Section -->
+           <div style="text-align: center; margin-bottom: 40px;">
+             <p style="font-size: 40px; color: #2980b9; font-weight: bold; margin: 0; letter-spacing: 3px; padding: 15px 30px; background-color: #ecf3fb; border-radius: 8px; display: inline-block;">
+               ${otp}
+             </p>
+             <p style="font-size: 16px; color: #7f8c8d; margin-top: 20px;">Your OTP code will expire in 5 minutes. Please use it promptly to complete the verification process.</p>
+           </div>
+       
+           <!-- Instructions Section -->
+           <div style="text-align: center; margin-bottom: 30px;">
+             <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 10px;">
+               If you did not request this, please ignore this email or contact support.
+             </p>
+             <p style="font-size: 14px; color: #7f8c8d;">
+               For security reasons, this code will expire in 5 minutes from the time of sending.
+             </p>
+           </div>
+       
+           <!-- Footer Section -->
+           <div style="text-align: center;">
+             <p style="font-size: 14px; color: #7f8c8d; margin-top: 20px;">
+               Best regards,<br />
+               <strong>Your App Name Team</strong>
+             </p>
+           </div>
+       
+           <!-- Disclaimer Section -->
+           <div style="text-align: center; font-size: 12px; color: #7f8c8d; margin-top: 40px;">
+             <p style="margin-bottom: 5px;">This is an automated message. Please do not reply directly to this email.</p>
+             <p style="margin-bottom: 0;">For any assistance, contact our <a href="mailto:support@yourapp.com" style="color: #2980b9; text-decoration: none;">support team</a>.</p>
+           </div>
+         </div>
+       </div>
     `;
 
-    // Send OTP email
     await sendOtpInEmail(email, emailSubject, emailHtml);
     const user = new User({
       userName,
       email,
+      
       password: hash,
-      otp:otpHash,
+      otp: otpHash,
     });
 
     const data = {
@@ -298,8 +324,8 @@ exports.registerInWeb = async (req, res) => {
 
     return res.status(200).json({
       status: true,
-      message:` User registered successfully. OTP sent to email`,
-      data:data.email
+      message: ` User registered successfully. OTP sent to email`,
+      data: data.email,
     });
   } catch (error) {
     console.error("Error during registration: ", error);
@@ -310,37 +336,43 @@ exports.registerInWeb = async (req, res) => {
   }
 };
 
-
 exports.verifyOtp = async (req, res) => {
   try {
-    const { email, otp } = req.body;  
+    const { email, otp } = req.body;
 
-    console.log('req.body :>> ', req.body);
+    console.log("req.body :>> ", req.body);
 
     if (!email || !otp) {
-      return res.status(400).json({ status: false, message: 'Email and OTP are required' });
+      return res
+        .status(400)
+        .json({ status: false, message: "Email and OTP are required" });
     }
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(404).json({ status: false, message: 'User not found' });
+      return res.status(404).json({ status: false, message: "User not found" });
     }
 
-    console.log('user.otp', user.otp)
+    console.log("user.otp", user.otp);
 
     if (!user.otp) {
-      return res.status(400).json({ status: false, message: 'OTP not generated or expired' });
+      return res
+        .status(400)
+        .json({ status: false, message: "OTP not generated or expired" });
     }
 
     const isOtpValid = await bcrypt.compare(otp, user.otp);
 
     if (!isOtpValid) {
-      return res.status(400).json({ status: false, message: 'Invalid OTP' });
+      return res.status(400).json({ status: false, message: "Invalid OTP" });
     }
 
-    user.otp = undefined;  
-    user.isVerified = true;
+    if (isOtpValid) {
+      user.otp = null;
+      user.isEmailVerified = !user.isEmailVerified;
+    }
+
     await user.save();
 
     const data = {
@@ -350,21 +382,30 @@ exports.verifyOtp = async (req, res) => {
       address: user.address,
     };
 
-
     const token = jwt.sign(data, process.env.JWT_SECRET);
 
     return res.status(200).json({
       status: true,
-      message: 'User logged in successfully',
+      message: "User logged in successfully",
       auth_token: token,
       data,
     });
   } catch (error) {
-    console.error('Error during OTP verification:', error);
+    console.error("Error during OTP verification:", error);
     return res.status(500).json({ status: false, message: error.message });
   }
 };
 
+exports.resend_otp = async (req, res) => {
+  try {
+  } catch (error) {
+    console.log("error :>> ", error);
+    return res.status(500).json({
+      status: false,
+      message: "Internal Server Error !!",
+    });
+  }
+};
 
 exports.addAddress = async (req, res) => {
   try {
@@ -477,253 +518,3 @@ exports.removeAddress = async (req, res) => {
     return res.status(500).json({ msg: error.message });
   }
 };
-   
-// {{{{{{{{{{{{((((((<<<<<<<<<<<<<< User Controller End >>>>>>>>>>>>>>}}))))})))}}}}}}}}
-
-exports.j =async(req,res)=>{
-  try {
-    const {userName,email,password}=req.body
-
-    if (!userName || !email || !password) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid fields required"
-      })
-    }
-
-    const hashedPassword = await bcrypt.hash(password,10)
-
-    const user = await User()
-
-    user.userName = userName
-    user.email = email 
-    user.password = hashedPassword
-
-    await user.save()
-
-    return res.status(200).json({
-      status:true,
-      message:"User Created Successfully",
-      user
-    })
-  } catch (error) {
-    console.log('error', error)
-    return res.status(500).json({
-      status:false,
-      message:"Internal Server Error",
-    })
-  }
-}
-
-
-exports.m = async(req,res)=>{
-  try {
-    const page = parseInt(req.query.page) || 0
-    const limit = parseInt(req.query.limit) || 10
-    const skip = page * limit
-    const search = req.query.search || ``
-
-    const fieldsToSearch = [`userName`,`email`,`createdAt`]
-
-    const matchQuery = {
-      $or:fieldsToSearch.map((field)=>({
-        [field]:{$regex:search,$options:'i'}
-      }))
-    }
-
-    const commonPipeline = [
-      {
-        $match:matchQuery
-      }
-    ]
-
-    const paginationPipeline = [
-      ...commonPipeline,
-      {$skip:skip},
-      {$limit:limit},
-      {$sort:{createdAt:-1}}
-    ]
-
-    const countPipeline = [
-      ...commonPipeline,
-      {$count:'totalCount'}
-    ]
-
-    const user = await User.aggregate(paginationPipeline)
-
-    const totalUser = await User.aggregate(countPipeline)
-
-    return res.status(200).json({
-      status:false,
-      message:"User Created Successfully",
-      user,
-      totalUser
-    })
-  } catch (error) {
-    console.log('error :>> ', error);
-    return res.status(500).json({
-      status:false,
-      message:"Internal Server Error"
-    })
-  }
-}
-
-exports.l = async(req,res)=>{
-  try {
-    const {email,password}=req.body
-
-    if (!email || !password) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid fields required"
-      })
-    }
-
-    const hashedPassword = await bcrypt.hash(password,10)
-
-    const user = await User.findOne({email})
-
-    if (!user) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid credentials"
-      })
-    }
-
-    const isMatch = await bcrypt.compare(hashedPassword,user.password)
-
-    if (!isMatch) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid credentials "
-      })
-    }
-
-    return res.status(200).json({
-      status:false,
-      message:"User Created Successfully",
-      user
-    })
-  } catch (error) {
-    console.log('error :>> ', error);
-    return res.status(500).json({
-      status:false,
-      message:"Internal Server Error"
-    })
-  }
-}
-
-exports.f = async(req,res)=>{
-  try {
-    const {userName ,email ,password}=req.body
-
-    const {userId}=req.query
-
-    if (!userName || !email || !password) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid fields required"
-      })
-    }
-
-    if (!userId) {
-      return res.status(401).json({
-        status:false,
-        message:"userId is required"
-      })
-    }
-  } catch (error) {
-    console.log('error :>> ', error);
-    return res.status(500).json({
-       status:false,
-       message:"Internal Server Error"
-    })
-  }
-}
-
-exports.jfbb= async(req,res)=>{
-  try {
-    const {userName ,email ,password}=req.body
-
-    if (!userName || !email || !password) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid fields required"
-      })
-    }
-
-    const user = await User()
-
-    user.userName = userName 
-    user.email = email 
-    user.password = await bcrypt.hash(password,10)
-
-    await user.save()
-
-    const payload = {
-      id:user._id,
-      email:user.email
-    }
-
-    const token = jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:`1d`})
-
-
-    return res.status(200).json({
-      status:false,
-      message:"User Created Successfully",
-      user,
-      token
-    })
-  } catch (error) {
-    console.log('error :>> ', error);
-    return res.status(5000).json({
-      status:false,
-      message:"Internal server error !!!"
-    })
-  }
-}
-
-exports.xm = async(req,res)=>{
-  try {
-    const {email,password}=req.body
-
-    if (!email || !password) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid fields required"
-      })
-    }
-
-    const user = await User.findOne({email})
-
-    if (!user) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid creadentials !!!"
-      })
-    }
-
-    const isMatch = await bcrypt.compare(password,user.password)
-
-    if (!isMatch) {
-      return res.status(401).json({
-        status:false,
-        message:"Invalid creadentials !!!"
-      })
-    }
-
-    const payload = {
-      id:user._id,
-      email:user.email
-    }
-
-    return res.status(200).json({
-      status:false,
-      message:"User Created Successfully",
-      user,
-      token:jwt.sign(payload,process.env.JWT_SECRET,{expiresIn:`1d`})
-    })
-  } catch (error) {
-    console.log('error :>> ', error);
-  }
-}
