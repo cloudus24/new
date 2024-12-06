@@ -259,8 +259,8 @@ exports.registerInWeb = async (req, res) => {
     const otpHash = await bcrypt.hash(otp.toString(), 10);
     console.log("otp :>> ", otp);
     const emailSubject = "Your OTP for Registration";
-    const emailHtml = `
-       <div style="font-family: 'Arial', sans-serif; background-color: #f3f4f7; padding: 40px 0; margin: 0; box-sizing: border-box;">
+    const emailHtml =
+    `<div style="font-family: 'Arial', sans-serif; background-color: #f3f4f7; padding: 40px 0; margin: 0; box-sizing: border-box;">
          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 40px; border-radius: 10px; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);">
            <!-- Header Section -->
            <div style="text-align: center; margin-bottom: 30px;">
@@ -303,8 +303,7 @@ exports.registerInWeb = async (req, res) => {
              <p style="margin-bottom: 0;">For any assistance, contact our <a href="mailto:support@yourapp  .com" style="color: #2980b9; text-decoration: none;">support team</a>.</p>
            </div>
          </div>
-       </div>
-    `;
+       </div>`;
 
     await sendOtpInEmail(email, emailSubject, emailHtml);
     const user = new User({
