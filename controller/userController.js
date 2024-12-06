@@ -300,7 +300,7 @@ exports.registerInWeb = async (req, res) => {
            <!-- Disclaimer Section -->
            <div style="text-align: center; font-size: 12px; color: #7f8c8d; margin-top: 40px;">
              <p style="margin-bottom: 5px;">This is an automated message. Please do not reply directly to this email.</p>
-             <p style="margin-bottom: 0;">For any assistance, contact our <a href="mailto:support@yourapp.com" style="color: #2980b9; text-decoration: none;">support team</a>.</p>
+             <p style="margin-bottom: 0;">For any assistance, contact our <a href="mailto:support@yourapp  .com" style="color: #2980b9; text-decoration: none;">support team</a>.</p>
            </div>
          </div>
        </div>
